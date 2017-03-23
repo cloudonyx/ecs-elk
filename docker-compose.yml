@@ -1,0 +1,42 @@
+version: '2'
+
+services:
+
+  elasticsearch:
+    cpu_shares: 250
+    mem_limit: 512000000
+    image: elasticsearch:5.2.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      xpack.security.enabled: "false"
+      xpack.monitoring.enabled: "false"
+      xpack.graph.enabled: "false"
+      xpack.watcher.enabled: "false"
+
+  logstash:
+    cpu_shares: 100
+    mem_limit: 128000000
+    image: logstash:5.2.1
+    volumes:
+      - logstash.yml:/usr/share/logstash/config/logstash.yml
+      - logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5000:5000"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    links:
+      - elasticsearch
+
+  kibana:
+    cpu_shares: 200
+    mem_limit: 390000000
+    image: kibana:5.2.1
+    volumes:
+     - kibana.yml:/opt/kibana/config/kibana.yml
+    ports:
+      - "5601:5601"
+    links:
+      - elasticsearch
